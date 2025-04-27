@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youssef Challenge Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .navbar {
+      background: #111;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #0ff;
+    }
+    .player-list {
+      margin: 20px 0;
+    }
+    .player {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+    .player-card {
+      background: #333;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #0ff;
+      text-align: center;
+    }
+    .card {
+      background: #222;
+      padding: 20px;
+      margin: 20px auto;
+      width: 320px;
+      min-height: 120px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 2px solid #0ff;
+      background: transparent;
+      color: #0ff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0ff;
+      color: #111;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .hidden {
+      display: none;
+    }
+    .gold {
+      color: gold;
+      font-weight: bold;
+    }
+    #allPlayersBox {
+      margin-top: 20px;
+    }
+    .player-list-item {
+      background: #333;
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px #0ff;
+    }
+  </style>
+  <audio id="bgMusic" src="sounds/background.mp3" loop></audio>
+  <audio id="clickSound" src="sounds/click.mp3"></audio>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">Youssef Challenge Zone</div>
+    <div class="navbar-buttons">
+      <button onclick="toggleTheme(); playClickSound()">Theme</button>
+      <button onclick="toggleMusic(); playClickSound()" id="musicBtn">🎵 Music On</button>
+      <select id="languageSelect" onchange="changeLanguage(); playClickSound()">
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+      </select>
+      <button onclick="exitGame()" style="background: darkred; color: white;">Exit</button>    </div>
+    <div id="mainPlayerPoints"></div>
+  </nav>
+  <div class="player-list" id="playerList">
+    <h3>Players</h3>
+    <div id="players"></div>
+    <input type="text" id="playerNameInput" placeholder="Enter player name">
+    <button onclick="addPlayer()">Add Player</button>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+  <div id="gameSection" class="hidden">
+    <div id="allPlayersBox" style="background: #222; padding: 10px; margin: 20px auto; width: 300px; border-radius: 10px; box-shadow: 0 0 10px #0ff;">
+      <h3>Players List</h3>
+      <div id="allPlayersList"></div>
+    </div>
+    <div id="currentPlayerBox" style="background: #222; padding: 10px; margin: 10px auto; width: 300px; border-radius: 10px; box-shadow: 0 0 10px #0ff;">
+      <h2 id="currentPlayer"></h2>
+      <p id="currentPlayerPoints">Points: 0</p>
+    </div>
+    <h3 id="currentLevel">Level 1</h3>
+    <div class="card" id="challengeCard">Click "Next Challenge" to start!</div>
+    <button id="nextChallengeBtn">Next Challenge</button>
+    <button id="completeChallengeBtn" class="hidden">I Completed It!</button>
+    <button id="skipChallengeBtn" class="hidden">Skip (-50 Points)</button>
+    <button id="punishmentBtn" class="hidden" style="background: #8B0000; border: 2px solid red; color: white; box-shadow: 0 0 10px red;">😈 عقاب (-5 نقاط)</button>
+    <p id="points">Points: 0</p>
+    <button id="finishGameBtn" class="hidden" style="font-size: 40px; padding: 30px 60px; background: linear-gradient(45deg, gold, orange); border: 5px solid white; border-radius: 20px; color: black; box-shadow: 0 0 20px gold; cursor: pointer;">🏆 Finish The Game! 🏆</button>
+  </div>
+  <script>
+    document.getElementById('finishGameBtn').addEventListener('mouseenter', moveFinishButton);
+
+function moveFinishButton() {
+  const button = document.getElementById('finishGameBtn');
+  const randomTop = Math.random() * 80;
+  const randomLeft = Math.random() * 80;
+  button.style.transform = "scale(0.7)";
+  button.style.position = "fixed";
+  button.style.top = `${randomTop}%`;
+  button.style.left = `${randomLeft}%`;
+  setTimeout(() => {
+    button.style.transform = "scale(1)";
+  }, 500);
+}
+    // (هكمللك هنا الجزء الثاني بعد موافقتك — عشان متقفزش الرسالة بسبب الحجم الكبير)
+    // بيانات اللعبة
+let players = [];
+let currentPlayerIndex = 0;
+let challenges = []; // التحديات
+let goldChallenges = []; // تحديات جولد
+let mainPlayerPoints = 0;
+let currentLevel = 1;
+
+const level1Challenges = [
+  "قول نكتة مضحكة 😂",
+  "اعمل صوت حيوان لمدة 10 ثواني 🐒",
+  "ارقص رقصة غريبة 🎵",
+  "قول سر عن نفسك 🤫",
+  "صف نفسك بكلمة واحدة ✨",
+  // (كمل بقية الأسئلة هنا زي ما اتفقنا)
+];
+
+const level1GoldChallenges = [
+  "جاوب بصراحة على سؤال محرج ⭐",
+  "غني مقطع أغنية قدام كل الناس ⭐",
+  "اعمل تحدي مضحك قدام الكاميرا ⭐",
+];
+
+const punishments = [
+  "اعمل 30 تمرين ضغط قدام الجميع",
+  "اتكلم بصوت طفولي لدقيقتين",
+  "غني بصوت عالي أغنية مش بتحبها",
+  "خلي حد يرسم على وشك رسمة غريبة",
+  "اقلد مشهد أكشن بطريقة مضحكة",
+  "اقعد ٥ دقايق بدون حركة",
+  "اقول حاجة محرجة حصلت معاك",
+  "اعمل تمثيل لمشهد حزين",
+  "اختر لاعب يطلب منك تحدي جديد",
+  "اتكلم عن شخص تحبه وانت مكسوف",
+  "اعمل تحدي رياضي صعب بدون توقف",
+  "غني مقطع راب عشوائي",
+  "اعمل رقصة مضحكة جدا",
+  "اتصل بحد وتقوله سر غريب",
+  "اعمل نداء لشخص بصوت عالي",
+  "اعمل ١٠ قفزات عالية",
+  "اكتب قصيدة مضحكة عن نفسك",
+  "خلي شخص يكتب لك تحدي جديد",
+  "امشي في خط مستقيم مغمض العينين",
+  "اقلد أغرب صوت حيوان تقدر عليه",
+  "ارسم رسمة مضحكة عن حياتك",
+  "اتظاهر انك مش فاهم حاجة لمدة دقيقة",
+  "اتكلم عن أكثر موقف خوفك",
+  "اتحدى نفسك انك ماتضحكش دقيقة",
+  "اعمل تحدي أكل بسيط",
+  "قول ٣ مواقف محرجة حصلت معاك",
+  "ارقص رقصة مشهورة جدا بطريقة فاشلة",
+  "احكي أكتر سر كنت مخبيه",
+  "اعمل تحدي الغمزة بدون كلام",
+  "اتظاهر انك مذيع أخبار لمدة دقيقة",
+  "اغني بدون موسيقى قدام اللاعبين",
+  "اقلد شخصيتين مشهورتين مع بعض",
+  "اعمل مشهد درامي عشوائي",
+  "اعمل مشهد قتال وهمي",
+  "خليك صامت دقيقة وانت بتمثل مشهد",
+  "اعمل مشهد خيال علمي صغير",
+  "قول نكتة سخيفة جدا",
+  "اعمل مشهد تمثيلي مع لاعب آخر",
+  "ارسم خريطة العالم من الذاكرة",
+  "اكتب رسالة حب مضحكة لشخص وهمي",
+  "اعمل مشهد اعلان منتج وهمي",
+  "حاول ترقص بدون ما تحرك رجلك",
+  "قلد أكتر حركة بتميزك",
+  "اصرخ كلمة عشوائية فجأة",
+  "اتصرف كأنك بطل فيلم رعب",
+  "اعمل دور مهرج لمدة دقيقة",
+  "اعمل تمثيل لهدف كروي عظيم",
+  "اتظاهر انك لاعب سيرك محترف",
+  "احكي عن أكثر حلم غريب شوفته"
+];
+
+function generatePunishmentReward() {
+  const rand = Math.random();
+  if (rand < 0.005) return 100; // 0.5% فرصة
+  if (rand < 0.015) return 50;  // 1% فرصة
+  if (rand < 0.035) return 20;  // 2% فرصة
+  if (rand < 0.065) return 10;  // 3% فرصة
+  if (rand < 0.115) return 5;   // 5% فرصة
+  if (rand < 0.195) return 4;   // 8% فرصة
+  if (rand < 0.295) return 3;   // 10% فرصة
+  if (rand < 0.495) return 2;   // 20% فرصة
+  return 1; // 50% فرصة
+}
+
+function addPlayer() {
+  const name = document.getElementById('playerNameInput').value.trim();
+  if (name) {
+    players.push({ name: name, points: 0 });
+    updatePlayers();
+    updateAllPlayersList();
+    document.getElementById('playerNameInput').value = '';
+  }
+}
+
+function updatePlayers() {
+  const playersDiv = document.getElementById('players');
+  playersDiv.innerHTML = '';
+  players.forEach((player, index) => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.innerHTML = `<strong>${player.name}</strong><br>Points: ${player.points}`;
+    playersDiv.appendChild(card);
+  });
+}
+
+function updateAllPlayersList() {
+  const allPlayersDiv = document.getElementById('allPlayersList');
+  allPlayersDiv.innerHTML = '';
+  players.forEach(player => {
+    const item = document.createElement('div');
+    item.className = 'player-list-item';
+    item.innerHTML = `<strong>${player.name}</strong> - ${player.points} pts`;
+    allPlayersDiv.appendChild(item);
+  });
+}
+
+function updateCurrentPlayerInfo() {
+  document.getElementById('currentPlayer').textContent = players[currentPlayerIndex].name;
+  document.getElementById('currentPlayerPoints').textContent = `Points: ${players[currentPlayerIndex].points}`;
+}
+
+function startGame() {
+  if (players.length === 0) return;
+  document.getElementById('playerList').classList.add('hidden');
+  document.getElementById('gameSection').classList.remove('hidden');
+  updateCurrentPlayerInfo();
+  challenges = [...level1Challenges];
+  goldChallenges = [...level1GoldChallenges];
+  updateMainPoints();
+  updateAllPlayersList();
+}
+
+function updateMainPoints() {
+  document.getElementById('mainPlayerPoints').textContent = `⭐ Main Player Points: ${mainPlayerPoints}`;
+}
+
+document.getElementById('nextChallengeBtn').addEventListener('click', () => {
+  let isGold = Math.random() <= 0.15; // نسبة الجولد 15%
+  let challengeText = '';
+
+  if (isGold && goldChallenges.length > 0) {
+    const idx = Math.floor(Math.random() * goldChallenges.length);
+    challengeText = goldChallenges[idx];
+    challengeCard.innerHTML = `<span class='gold'>${challengeText}</span>`;
+  } else if (challenges.length > 0) {
+    const idx = Math.floor(Math.random() * challenges.length);
+    challengeText = challenges[idx];
+    challengeCard.innerText = challengeText;
+  } else {
+    challengeCard.innerText = "No more challenges!";
+  }
+
+  document.getElementById('nextChallengeBtn').classList.add('hidden');
+  document.getElementById('completeChallengeBtn').classList.remove('hidden');
+  document.getElementById('skipChallengeBtn').classList.remove('hidden');
+  document.getElementById('punishmentBtn').classList.remove('hidden');
+});
+
+document.getElementById('completeChallengeBtn').addEventListener('click', () => {
+  handleChallengeCompletion(true);
+});
+
+document.getElementById('skipChallengeBtn').addEventListener('click', () => {
+  handleChallengeCompletion(false);
+});
+
+document.getElementById('punishmentBtn').addEventListener('click', () => {
+  handlePunishment();
+});
+
+function handleChallengeCompletion(completed) {
+  if (completed) {
+    let text = document.getElementById('challengeCard').innerText;
+    let isGold = text.includes('⭐');
+    let pointsEarned = 0;
+
+    if (isGold) {
+      players[currentPlayerIndex].points += 15;
+      mainPlayerPoints += 2;
+      pointsEarned = 15;
+    } else {
+      players[currentPlayerIndex].points += 1;
+      mainPlayerPoints += 2;
+      pointsEarned = 1;
+    }
+
+    showRewardBubble(pointsEarned);
+
+    nextTurn();
+    updateCurrentPlayerInfo();
+  } else {
+    if (players[currentPlayerIndex].points >= 50) {
+      players[currentPlayerIndex].points -= 50;
+      nextTurn();
+      updateCurrentPlayerInfo();
+    } else {
+      alert("ماينفعش تتخطى التحدي! انت معندكش نقاط كفاية لازم تعمل التحدي!");
+    }
+  }
+}
+
+function handlePunishment() {
+  if (players[currentPlayerIndex].points >= 5) {
+    players[currentPlayerIndex].points -= 5;
+  } else {
+    players[currentPlayerIndex].points = 0;
+  }
+
+  const punishment = punishments[Math.floor(Math.random() * punishments.length)];
+  alert(`😈 عقابك هو:\n${punishment}\nنفذه الآن!`);
+
+  // بعد تنفيذ العقاب يحسب النقاط
+  setTimeout(() => {
+    const reward = generatePunishmentReward();
+    players[currentPlayerIndex].points += reward;
+    showRewardBubble(reward);
+
+    nextTurn();
+    updateCurrentPlayerInfo();
+    updateAllPlayersList();
+    updateMainPoints();
+  }, 2000); // انتظار ثانيتين وكأن اللاعب نفذ العقاب
+}
+
+function showRewardBubble(points) {
+  const bubble = document.createElement('div');
+  bubble.textContent = `+${points} pts`;
+  bubble.style.position = 'fixed';
+  bubble.style.top = (Math.random() * 50 + 25) + '%';
+  bubble.style.left = (Math.random() * 50 + 25) + '%';
+  bubble.style.background = 'rgba(255, 215, 0, 0.9)';
+  bubble.style.color = '#000';
+  bubble.style.padding = '10px 20px';
+  bubble.style.borderRadius = '20px';
+  bubble.style.fontSize = '20px';
+  bubble.style.boxShadow = '0 0 10px gold';
+  bubble.style.zIndex = '1000';
+  bubble.style.opacity = '1';
+  bubble.style.transition = 'all 1s ease-out';
+  document.body.appendChild(bubble);
+
+  setTimeout(() => {
+    bubble.style.transform = 'scale(1.5)';
+    bubble.style.opacity = '0';
+  }, 100);
+
+  setTimeout(() => {
+    bubble.remove();
+  }, 1200);
+}
+
+function nextTurn() {
+  currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  updateCurrentPlayerInfo();
+  updatePlayers();
+  updateAllPlayersList();
+  updateMainPoints();
+  document.getElementById('completeChallengeBtn').classList.add('hidden');
+  document.getElementById('skipChallengeBtn').classList.add('hidden');
+  document.getElementById('punishmentBtn').classList.add('hidden');
+  document.getElementById('nextChallengeBtn').classList.remove('hidden');
+  document.getElementById('challengeCard').innerText = "Click 'Next Challenge' to start!";
+  
+  checkLevelUp();
+}
+
+function checkLevelUp() {
+  const totalPoints = players.reduce((sum, player) => sum + player.points, 0);
+
+  if (totalPoints >= 150 && currentLevel === 1) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 150! عايزين تدخلوا المرحلة التانية؟")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+
+        // تغيير لون النيون إلى أحمر
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.boxShadow = "0 0 10px red";
+          el.style.border = "2px solid red";
+        });
+
+        // تحديات المرحلة الثانية
+        challenges = [
+          "اعمل فيديو قصير بتغني فيه 🎤",
+          "قول موقف محرج حصل معاك 🤭",
+          "اعمل حركة رياضية لمدة 20 ثانية 🏋️‍♂️",
+          "قول أكتر حاجة بتخاف منها 😱",
+          "ارقص رقصة مجنونة لمدة دقيقة كاملة 💃",
+          "جاوب على سؤال صعب بدون تردد ⚡",
+          "قلد شخصية مشهورة قدام الكل 😂",
+          "احكي عن سر عمرك ما قلته لحد 🤐",
+          "اعمل حركة بهلوانية لو تقدر 🤸‍♂️",
+          "غني أغنية بدون لحن 🎶",
+        ];
+
+        goldChallenges = [
+          "تحدي جولد: اعمل بث مباشر دقيقة ⭐",
+          "تحدي جولد: قول حاجة تحرج نفسك بيها ⭐",
+          "تحدي جولد: اركض مكانك 30 ثانية بأقصى سرعة ⭐",
+        ];
+      }
+    }, 100);
+  } else if (totalPoints >= 300 && currentLevel === 2) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 300! عايزين تدخلوا المرحلة التالتة؟")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+
+        // تغيير لون النيون إلى جولد
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.boxShadow = "0 0 10px gold";
+          el.style.border = "2px solid gold";
+        });
+
+        // تحديات المرحلة الثالثة
+        challenges = [
+          "اتكلم قدام الجميع عن أكثر شيء محرج مر عليك 😅",
+          "اعمل فيديو وتقليد مشهور وتشاركه مع الموجودين 😂",
+          "ارقص رقصة مجنونة وسط الغرفة 💃🔥",
+          "اتصل بصديق وقل له سر غريب عنك 📞🤐",
+          "قلد صوت شخصية كرتونية مشهورة 🎤",
+          "جاوب بكل صراحة: أكبر خطأ ارتكبته؟ 🤔",
+          "غني أغنية بطريقة كوميدية تماماً 😂",
+          "احكي عن موقف محرج جداً حصل معاك فجأة 😳",
+          "اعمل تحدي بهلواني صعب أو حاول 🤸‍♂️",
+          "اتكلم عن أكثر شخص تحبه في حياتك ❤️",
+        ];
+
+        goldChallenges = [
+          "تحدي جولد: قول أصعب سر في حياتك ⭐",
+          "تحدي جولد: أعمل فيديو بتغني أغنية رومانسية ⭐",
+          "تحدي جولد: اقلد مشهد من فيلم مشهور ⭐",
+        ];
+      }
+    }, 100);
+  } else if (totalPoints >= 380 && currentLevel === 3) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 380! جاهزين للمرحلة الرابعة المجنونة؟ 🚀")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+
+        // ألوان نيون متحركة في المرحلة الرابعة
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.animation = "neonPulse 2s infinite alternate";
+          el.style.border = "2px solid cyan";
+          el.style.boxShadow = "0 0 20px cyan, 0 0 40px magenta, 0 0 60px yellow";
+        });
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @keyframes neonPulse {
+            0% {
+              box-shadow: 0 0 10px cyan, 0 0 20px magenta, 0 0 30px yellow;
+            }
+            100% {
+              box-shadow: 0 0 20px magenta, 0 0 30px yellow, 0 0 40px cyan;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+
+        // تحديات المرحلة الرابعة
+        challenges = [
+          "كل اللاعبين يعملوا رقصة جماعية مضحكة معًا 😂",
+          "كل اللاعبين يقلدوا أغرب شخصية كرتونية معًا 🎭",
+          "يعملوا تحدي تمثيل فيلم أكشن مع بعض 🎬",
+          "يغنوا أغنية مشهورة بطريقة غريبة معًا 🎤",
+          "يرسموا بعضهم بطريقة مضحكة ويروها للجميع 🎨",
+          "يعملوا تحدي رياضي جماعي: 10 ضغط + 10 قفزات 🏋️‍♂️",
+          "كل واحد يمثل خوفه الأكبر 😱",
+          "عمل إعلان مجنون لمنتج وهمي 🎥",
+          "الكل يقلد شخصية معروفة بس بأسلوب غريب 😂",
+          "يرسموا خريطة العالم بدون ما يشوفوا 😅",
+        ];
+
+        goldChallenges = [
+          "تحدي جولد جماعي: يعملوا مشهد تمثيلي لفيلم رعب ⭐",
+          "تحدي جولد جماعي: يحكوا قصة وهمية مرعبة ⭐",
+          "تحدي جولد جماعي: يتظاهروا أنهم روبوتات لمدة دقيقة ⭐",
+        ];
+      }
+    }, 100);
+  } else if (totalPoints >= 500 && currentLevel === 4) {
+    document.getElementById('finishGameBtn').classList.remove('hidden');
+
+    setTimeout(() => {
+      document.getElementById('finishGameBtn').classList.add('hidden');
+      showFinalGroupChallenge();
+    }, 45000); // بعد 45 ثانية
+  }
+}
+// زرار النهاية وتحريكه
+// ---------- Handlers for Game Finish ----------
+// زرار النهاية وتحريكه (مرة واحدة فقط)
+document.getElementById('finishGameBtn').addEventListener('mouseenter', moveFinishButton);
+
+// ---------- Level Up Logic ----------
+/**
+ * دالة التحقق من التقدم في المراحل وعرض زر النهاية عند الوصول للنقاط المطلوبة
+ * - 150 نقطة ➔ المرحلة 2
+ * - 300 نقطة ➔ المرحلة 3
+ * - 380 نقطة ➔ المرحلة 4
+ * - 500 نقطة ➔ زرار النهاية
+ */
+function checkLevelUp() {
+  const totalPoints = players.reduce((sum, player) => sum + player.points, 0);
+
+  // الانتقال للمرحلة الثانية عند 150 نقطة
+  if (totalPoints >= 150 && currentLevel === 1) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 150! عايزين تدخلوا المرحلة التانية؟")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+        // تغيير لون النيون إلى أحمر
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.boxShadow = "0 0 10px red";
+          el.style.border = "2px solid red";
+        });
+        // تحديات المرحلة الثانية
+        challenges = [
+          "اعمل فيديو قصير بتغني فيه 🎤",
+          "قول موقف محرج حصل معاك 🤭",
+          "اعمل حركة رياضية لمدة 20 ثانية 🏋️‍♂️",
+          "قول أكتر حاجة بتخاف منها 😱",
+          "ارقص رقصة مجنونة لمدة دقيقة كاملة 💃",
+          "جاوب على سؤال صعب بدون تردد ⚡",
+          "قلد شخصية مشهورة قدام الكل 😂",
+          "احكي عن سر عمرك ما قلته لحد 🤐",
+          "اعمل حركة بهلوانية لو تقدر 🤸‍♂️",
+          "غني أغنية بدون لحن 🎶",
+        ];
+        goldChallenges = [
+          "تحدي جولد: اعمل بث مباشر دقيقة ⭐",
+          "تحدي جولد: قول حاجة تحرج نفسك بيها ⭐",
+          "تحدي جولد: اركض مكانك 30 ثانية بأقصى سرعة ⭐",
+        ];
+      }
+    }, 100);
+  }
+  // الانتقال للمرحلة الثالثة عند 300 نقطة
+  else if (totalPoints >= 300 && currentLevel === 2) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 300! عايزين تدخلوا المرحلة التالتة؟")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+        // تغيير لون النيون إلى جولد
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.boxShadow = "0 0 10px gold";
+          el.style.border = "2px solid gold";
+        });
+        // تحديات المرحلة الثالثة
+        challenges = [
+          "اتكلم قدام الجميع عن أكثر شيء محرج مر عليك 😅",
+          "اعمل فيديو وتقليد مشهور وتشاركه مع الموجودين 😂",
+          "ارقص رقصة مجنونة وسط الغرفة 💃🔥",
+          "اتصل بصديق وقل له سر غريب عنك 📞🤐",
+          "قلد صوت شخصية كرتونية مشهورة 🎤",
+          "جاوب بكل صراحة: أكبر خطأ ارتكبته؟ 🤔",
+          "غني أغنية بطريقة كوميدية تماماً 😂",
+          "احكي عن موقف محرج جداً حصل معاك فجأة 😳",
+          "اعمل تحدي بهلواني صعب أو حاول 🤸‍♂️",
+          "اتكلم عن أكثر شخص تحبه في حياتك ❤️",
+        ];
+        goldChallenges = [
+          "تحدي جولد: قول أصعب سر في حياتك ⭐",
+          "تحدي جولد: أعمل فيديو بتغني أغنية رومانسية ⭐",
+          "تحدي جولد: اقلد مشهد من فيلم مشهور ⭐",
+        ];
+      }
+    }, 100);
+  }
+  // الانتقال للمرحلة الرابعة عند 380 نقطة
+  else if (totalPoints >= 380 && currentLevel === 3) {
+    setTimeout(() => {
+      if (confirm("مجموع نقاط كل اللاعبين وصل 380! جاهزين للمرحلة الرابعة المجنونة؟ 🚀")) {
+        currentLevel++;
+        document.getElementById('currentLevel').textContent = `Level ${currentLevel}`;
+        // ألوان نيون متحركة في المرحلة الرابعة
+        document.querySelectorAll('.card, .player-card, .player-list-item, #currentPlayerBox, #allPlayersBox').forEach(el => {
+          el.style.animation = "neonPulse 2s infinite alternate";
+          el.style.border = "2px solid cyan";
+          el.style.boxShadow = "0 0 20px cyan, 0 0 40px magenta, 0 0 60px yellow";
+        });
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @keyframes neonPulse {
+            0% {
+              box-shadow: 0 0 10px cyan, 0 0 20px magenta, 0 0 30px yellow;
+            }
+            100% {
+              box-shadow: 0 0 20px magenta, 0 0 30px yellow, 0 0 40px cyan;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+        // تحديات المرحلة الرابعة
+        challenges = [
+          "كل اللاعبين يعملوا رقصة جماعية مضحكة معًا 😂",
+          "كل اللاعبين يقلدوا أغرب شخصية كرتونية معًا 🎭",
+          "يعملوا تحدي تمثيل فيلم أكشن مع بعض 🎬",
+          "يغنوا أغنية مشهورة بطريقة غريبة معًا 🎤",
+          "يرسموا بعضهم بطريقة مضحكة ويروها للجميع 🎨",
+          "يعملوا تحدي رياضي جماعي: 10 ضغط + 10 قفزات 🏋️‍♂️",
+          "كل واحد يمثل خوفه الأكبر 😱",
+          "عمل إعلان مجنون لمنتج وهمي 🎥",
+          "الكل يقلد شخصية معروفة بس بأسلوب غريب 😂",
+          "يرسموا خريطة العالم بدون ما يشوفوا 😅",
+        ];
+        goldChallenges = [
+          "تحدي جولد جماعي: يعملوا مشهد تمثيلي لفيلم رعب ⭐",
+          "تحدي جولد جماعي: يحكوا قصة وهمية مرعبة ⭐",
+          "تحدي جولد جماعي: يتظاهروا أنهم روبوتات لمدة دقيقة ⭐",
+        ];
+      }
+    }, 100);
+  }
+  // بعد المرحلة الرابعة عند 500 نقطة: إظهار زر النهاية
+  else if (totalPoints >= 500 && currentLevel === 4) {
+    document.getElementById('finishGameBtn').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('finishGameBtn').classList.add('hidden');
+      showFinalGroupChallenge();
+    }, 45000); // بعد 45 ثانية
+  }
+}
+
+// ---------- Handlers for Game Finish ----------
+/**
+ * تحريك زرار النهاية عند الاقتراب منه
+ */
+function moveFinishButton() {
+  const button = document.getElementById('finishGameBtn');
+  const randomTop = Math.random() * 80;
+  const randomLeft = Math.random() * 80;
+  button.style.transform = "scale(0.7)";
+  button.style.position = "fixed";
+  button.style.top = `${randomTop}%`;
+  button.style.left = `${randomLeft}%`;
+  setTimeout(() => {
+    button.style.transform = "scale(1)";
+  }, 500);
+}
+
+/**
+ * عرض التحدي النهائي الجماعي وزيادة النقاط
+ */
+function showFinalGroupChallenge() {
+  const challenge = "💥 تحدي نهائي جماعي: كل اللاعبين يجب أن يمثلوا معًا مشهد درامي حزين لمدة دقيقة كاملة مع استخدام مشاعر حقيقية! 💥";
+  document.getElementById('challengeCard').innerText = challenge;
+  players.forEach(player => {
+    player.points += 50;
+  });
+  updatePlayers();
+  updateAllPlayersList();
+  updateMainPoints();
+  setTimeout(() => {
+    showWinners();
+  }, 10000);
+}
+
+/**
+ * عرض الفائزين النهائيين وتخزينهم في localStorage
+ */
+function showWinners() {
+  players.sort((a, b) => b.points - a.points);
+  const topThree = players.slice(0, 3);
+  let winnersText = "🏆 النتائج النهائية 🏆\n";
+  topThree.forEach((player, index) => {
+    winnersText += `${index + 1}. ${player.name} - ${player.points} نقاط\n`;
+  });
+  alert(winnersText);
+  localStorage.setItem('weeklyChampion', topThree[0].name);
+  localStorage.setItem('weeklyPoints', topThree[0].points);
+  setTimeout(() => {
+    window.location.href = "hall-of-fame.html";
+  }, 3000);
+}
+    // اضغط Enter لإضافة اللاعب
+    document.getElementById('playerNameInput').addEventListener('keydown', function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // يمنع أي ريفريش للصفحة
+        addPlayer();
+      }
+    });
+    // تحكم بالكيبورد داخل اللعبة
+document.addEventListener('keydown', function(event) {
+  if (document.getElementById('gameSection').classList.contains('hidden')) return; // لو لسه في شاشة إضافة اللاعبين
+
+  const key = event.key.toLowerCase();
+
+  if (event.key === 'Enter') {
+    if (!document.getElementById('nextChallengeBtn').classList.contains('hidden')) {
+      document.getElementById('nextChallengeBtn').click();
+    } else if (!document.getElementById('completeChallengeBtn').classList.contains('hidden')) {
+      document.getElementById('completeChallengeBtn').click();
+    }
+  }
+
+  if (key === 'w' && !document.getElementById('skipChallengeBtn').classList.contains('hidden')) {
+    document.getElementById('skipChallengeBtn').click();
+  }
+
+  if (key === 'q' && !document.getElementById('punishmentBtn').classList.contains('hidden')) {
+    if (players[currentPlayerIndex].points >= 5) {
+      document.getElementById('punishmentBtn').click();
+    } else {
+      alert("❌ لازم يكون معاك 5 نقاط علشان تختار العقاب!");
+    }
+  }
+});
+
+  let currentTheme = 'dark';
+
+  function toggleTheme() {
+    const body = document.body;
+    const navbar = document.querySelector('.navbar');
+    const buttons = document.querySelectorAll('button');
+    const cards = document.querySelectorAll('.card');
+    
+    if (currentTheme === 'dark') {
+      // Light Mode
+      body.style.background = 'linear-gradient(135deg, #ffffff, #f0f0f0)';
+      body.style.color = '#000';
+      navbar.style.background = '#e0e0e0';
+      buttons.forEach(btn => {
+        btn.style.background = '#fff';
+        btn.style.color = '#000';
+        btn.style.border = '2px solid #ddd';
+      });
+      cards.forEach(card => {
+        card.style.background = '#f9f9f9';
+        card.style.color = '#000';
+        card.style.boxShadow = '0 0 10px #ccc';
+      });
+      currentTheme = 'light';
+    } else if (currentTheme === 'light') {
+      // Pink Mode
+      body.style.background = 'linear-gradient(135deg, #ff69b4, #ff1493)';
+      body.style.color = '#000';
+      navbar.style.background = '#ff85c0';
+      buttons.forEach(btn => {
+        btn.style.background = '#ffe4e1';
+        btn.style.color = '#000';
+        btn.style.border = '2px solid #ff85c0';
+      });
+      cards.forEach(card => {
+        card.style.background = '#ffd1dc';
+        card.style.color = '#000';
+        card.style.boxShadow = '0 0 10px #ff85c0';
+      });
+      currentTheme = 'pink';
+    } else {
+      // Dark Mode
+      body.style.background = 'linear-gradient(135deg, #0f0f0f, #1a1a1a)';
+      body.style.color = '#fff';
+      navbar.style.background = '#111';
+      buttons.forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = '#0ff';
+        btn.style.border = '2px solid #0ff';
+      });
+      cards.forEach(card => {
+        card.style.background = '#222';
+        card.style.color = '#fff';
+        card.style.boxShadow = '0 0 10px #0ff';
+      });
+      currentTheme = 'dark';
+    }
+  }
+
+
+function toggleMusic() {
+  const music = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+  if (music.paused) {
+    music.play();
+    btn.textContent = "🎵 Music On";
+  } else {
+    music.pause();
+    btn.textContent = "🔇 Music Off";
+  }
+}
+
+function changeLanguage() {
+  const lang = document.getElementById('languageSelect').value;
+  if (lang === 'ar') {
+    document.body.dir = 'rtl';
+    document.title = "لعبة تحديات يوسف";
+    updateButtonLabels({
+      addPlayer: "أضف لاعب",
+      startGame: "ابدأ اللعبة",
+      nextChallenge: "التحدي التالي",
+      completeChallenge: "أنجزته!",
+      skipChallenge: "تخطي (-50 نقطة)",
+      punishment: "😈 عقاب (-5 نقاط)",
+      theme: "تغيير النمط",
+      exit: "خروج"
+    });
+  } else if (lang === 'de') {
+    document.body.dir = 'ltr';
+    document.title = "Youssef Herausforderung Spiel";
+    updateButtonLabels({
+      addPlayer: "Spieler hinzufügen",
+      startGame: "Spiel starten",
+      nextChallenge: "Nächste Herausforderung",
+      completeChallenge: "Ich habe es geschafft!",
+      skipChallenge: "Überspringen (-50 Punkte)",
+      punishment: "😈 Strafe (-5 Punkte)",
+      theme: "Thema ändern",
+      exit: "Beenden"
+    });
+  } else if (lang === 'es') {
+    document.body.dir = 'ltr';
+    document.title = "Juego de Desafío de Youssef";
+    updateButtonLabels({
+      addPlayer: "Agregar jugador",
+      startGame: "Iniciar juego",
+      nextChallenge: "Siguiente desafío",
+      completeChallenge: "¡Lo completé!",
+      skipChallenge: "Saltar (-50 puntos)",
+      punishment: "😈 Castigo (-5 puntos)",
+      theme: "Cambiar tema",
+      exit: "Salir"
+    });
+  } else {
+    document.body.dir = 'ltr';
+    document.title = "Youssef Challenge Game";
+    updateButtonLabels({
+      addPlayer: "Add Player",
+      startGame: "Start Game",
+      nextChallenge: "Next Challenge",
+      completeChallenge: "I Completed It!",
+      skipChallenge: "Skip (-50 Points)",
+      punishment: "😈 Punishment (-5 Points)",
+      theme: "Theme",
+      exit: "Exit"
+    });
+  }
+}
+
+function updateButtonLabels(labels) {
+  document.querySelector('button[onclick*="addPlayer"]').innerText = labels.addPlayer;
+  document.querySelector('button[onclick*="startGame"]').innerText = labels.startGame;
+  document.getElementById('nextChallengeBtn').innerText = labels.nextChallenge;
+  document.getElementById('completeChallengeBtn').innerText = labels.completeChallenge;
+  document.getElementById('skipChallengeBtn').innerText = labels.skipChallenge;
+  document.getElementById('punishmentBtn').innerText = labels.punishment;
+  document.querySelector('button[onclick*="toggleTheme"]').innerText = labels.theme;
+  document.querySelector('button[onclick*="toggleMusic"]').innerText = labels.music;
+  document.querySelector('button[onclick*="exitGame"]').innerText = labels.exit;
+}
+function toggleMusic() {
+  const music = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+  if (music.paused) {
+    music.play();
+    btn.textContent = "🔊 Music On";
+  } else {
+    music.pause();
+    btn.textContent = "🔇 Music Off";
+  }
+}
+function exitGame() {
+  if (confirm("هل أنت متأكد أنك تريد الرجوع للصفحة الرئيسية؟")) {
+    window.location.href = "index.html"; // قم بتغيير "index.html" إلى اسم الصفحة التي تريد التوجيه إليها
+  }
+}
+
+
+function playClickSound() {
+  const click = document.getElementById('clickSound');
+  click.currentTime = 0; // إعادة تشغيل الصوت من البداية
+  click.play();
+}
+document.getElementById('gameBtn').style.display = 'none';
+
+// إظهار الزر بعد إضافة اللاعبين
+function showGameButton() {
+  document.getElementById('gameBtn').style.display = 'block';
+}
+
+    </script>
+    </body>
+    </html>

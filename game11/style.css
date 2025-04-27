@@ -1,0 +1,265 @@
+/* Style.css */
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    color: white;
+    transition: 0.4s;
+}
+
+.navbar {
+    background: #111;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    box-shadow: 0 0 10px #0ff;
+    position: sticky; /* يجعل النافبار ثابتة أثناء التمرير */
+    top: 0;
+    z-index: 1000; /* يجعلها فوق العناصر الأخرى */
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0ff;
+}
+
+.navbar .nav-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end; /* لتنسيق الأزرار جهة اليمين */
+    gap: 20px; /* زيادة المسافات بين الأزرار */
+    align-items: center;
+}
+
+.navbar .nav-buttons button, 
+.navbar .nav-buttons a {
+    padding: 12px 24px; /* تكبير الحشوات لجعل الأزرار أكبر */
+    font-size: 18px; /* تكبير النصوص */
+    border: 2px solid #0ff;
+    background: transparent;
+    color: #0ff;
+    border-radius: 12px; /* زيادة تقوس الحواف */
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex; /* لجعل الأيقونة والنص في نفس السطر */
+    align-items: center;
+    gap: 10px; /* مسافة بين الأيقونة والنص */
+}
+
+.navbar .nav-buttons button:hover, 
+.navbar .nav-buttons a:hover {
+    background: #0ff; /* تلوين الخلفية عند التمرير */
+    color: #111; /* تغيير لون النص */
+    box-shadow: 0 0 10px #0ff;
+}
+
+.navbar .nav-buttons .active {
+    background: #0ff; /* لون العنصر النشط */
+    color: #111;
+    box-shadow: 0 0 10px #0ff;
+}
+
+.games {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* زيادة المسافات بين الكروت */
+    margin-top: 20px; /* تقليل المسافة العلوية */
+    width: 100%; /* جعل الكروت تمتد بعرض الشاشة */
+    height: auto;
+}
+
+button, a.game-card {
+    flex: 1 1 calc(50% - 20px); /* جعل الكروت تمتد لنصف الشاشة */
+    max-width: calc(50% - 20px); /* ضبط العرض الأقصى */
+    height: auto;
+    padding: 40px; /* تكبير حجم الكروت */
+    font-size: 24px; /* زيادة حجم النص */
+    text-align: center;
+    background: transparent;
+    border: 2px solid #0ff;
+    color: #0ff;
+    cursor: pointer;
+    border-radius: 12px; /* زيادة تقوس الحواف */
+    transition: 0.3s ease-in-out;
+    text-decoration: none;
+    box-shadow: 0 0 10px #0ff; /* تأثير الظل */
+}
+
+button:hover, a.game-card:hover {
+    background: #0ff;
+    color: #111;
+    box-shadow: 0 0 20px #0ff; /* تكبير تأثير الظل */
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #222;
+    top: 50px;
+    right: 0;
+    min-width: 120px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.5);
+    z-index: 1;
+    border-radius: 8px;
+    flex-direction: column;
+}
+
+.dropdown-content button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #0ff;
+    text-align: left;
+    padding: 10px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: flex;
+}
+
+.login-section {
+    text-align: center;
+    margin-top: 100px;
+}
+
+input {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 18px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #0ff;
+    background: #222;
+    color: white;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.game-menu {
+    text-align: center;
+    margin-top: 50px;
+}
+
+@media screen and (max-width: 768px) {
+    .navbar .nav-buttons {
+        justify-content: center; /* جعل الأزرار في منتصف الشاشة */
+        gap: 15px;
+    }
+
+    .navbar .nav-buttons button, 
+    .navbar .nav-buttons a {
+        padding: 10px 20px; /* تقليل الحشوات */
+        font-size: 16px; /* تصغير النصوص قليلاً */
+    }
+    button, a.game-card {
+        flex: 1 1 calc(100% - 20px); /* جعل الكروت تمتد بعرض الشاشة بالكامل */
+        max-width: calc(100% - 20px);
+        padding: 30px; /* تقليل الحشوات للشاشات الأصغر */
+        font-size: 20px; /* تقليل حجم النص للشاشات الأصغر */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .navbar .nav-buttons {
+        flex-direction: column; /* ترتيب الأزرار بشكل عمودي */
+        align-items: center; /* توسيط الأزرار */
+    }
+
+    .navbar .nav-buttons button, 
+    .navbar .nav-buttons a {
+        width: 100%; /* جعل الأزرار بعرض الشاشة */
+        text-align: center;
+    }
+    button, a.game-card {
+        flex: 1 1 100%; /* جعل البطاقات تمتد بعرض الشاشة بالكامل في الشاشات الصغيرة */
+        max-width: 100%;
+    }
+}
+
+.game-card.white {
+    background: white;
+    color: black;
+}
+
+.game-card.black {
+    background: black;
+    color: white;
+}
+
+.game-card.pink {
+    background: #ff4da6;
+    color: white;
+}
+
+.game-card.neon {
+    background: transparent;
+    border: 2px solid #0ff;
+    box-shadow: 0 0 10px #0ff;
+}
+
+/* Themes */
+body.light-mode {
+    background: white;
+    color: black;
+}
+
+body.dark-mode {
+    background: #111;
+    color: white;
+}
+
+body.pink-mode {
+    background: #ffc0cb;
+    color: #111;
+}
+
+body.neon-mode {
+    background: #0f0f0f;
+    color: #0ff;
+}
+.game-card.blue {
+    background: #007bff;
+    color: white;
+    border: 2px solid #0056b3;
+}
+
+.game-card.green {
+    background: #28a745;
+    color: white;
+    border: 2px solid #1e7e34;
+}
+
+.game-card.purple {
+    background: #6f42c1;
+    color: white;
+    border: 2px solid #5a32a3;
+}
+
+.game-card.space {
+    background: #343a40;
+    color: white;
+    border: 2px solid #23272b;
+}
+
+.game-card.gold {
+    background: gold;
+    color: black;
+    border: 2px solid #e6b800;
+}

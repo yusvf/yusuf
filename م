@@ -1,0 +1,158 @@
+\.<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Challenge</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .navbar {
+      background: #111;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #0ff;
+    }
+    .navbar a {
+      color: #0ff;
+      text-decoration: none;
+      font-size: 18px;
+      background: transparent;
+      border: 2px solid #0ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .navbar a:hover {
+      background: #0ff;
+      color: #111;
+      box-shadow: 0 0 15px #0ff;
+    }
+    .challenge-container {
+      margin-top: 50px;
+    }
+    .card {
+      background: #222;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      min-height: 150px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 2px solid #0ff;
+      background: transparent;
+      color: #0ff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0ff;
+      color: #111;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">YoussefZone</div>
+    <a href="index.html">🔙 Home</a>
+  </nav>
+  <div class="challenge-container">
+    <h2>🎴 Card Challenge</h2>
+    <h3 id="currentLevel">Level: Easy</h3>
+<div class="card" id="challengeCard">Click "Next Challenge" to start!</div>
+
+<button id="nextChallengeBtn">Next Challenge</button>
+<button id="completeChallengeBtn" class="hidden">I Completed It!</button>
+
+<p id="points">Points: 0</p>
+  </div>
+  <script>
+    const challenges = {
+      easy: [
+        "قول نكتة مضحكة",
+        "صف نفسك بكلمة واحدة",
+        "اعمل صوت حيوان لمدة 10 ثواني",
+        "ارقص رقصة غريبة لمدة 5 ثواني"
+      ],
+      medium: [
+        "جاوب بصراحة: مين أكتر حد بتحبه في حياتك؟",
+        "اتصل بصديقك وقوله انك بتحبه",
+        "امثل مشهد درامي قدام الكل",
+        "قول سر من أسرارك الطفولية"
+      ],
+      hard: [
+        "ارقص قدام الكل 10 ثواني",
+        "غني أغنية كاملة بصوت عالي",
+        "احكي عن موقف محرج حصل لك",
+        "جاوب بصراحة: مين الشخص اللي نفسك تختفي من حياتك؟"
+      ]
+    };
+
+    let currentLevel = 'easy';
+    let points = 0;
+
+    const challengeCard = document.getElementById('challengeCard');
+    const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+    const completeChallengeBtn = document.getElementById('completeChallengeBtn');
+    const pointsDisplay = document.getElementById('points');
+    const currentLevelDisplay = document.getElementById('currentLevel');
+
+    nextChallengeBtn.addEventListener('click', () => {
+      const challengeList = challenges[currentLevel];
+      const randomChallenge = challengeList[Math.floor(Math.random() * challengeList.length)];
+      challengeCard.innerText = randomChallenge;
+      completeChallengeBtn.classList.remove('hidden');
+    });
+
+    completeChallengeBtn.addEventListener('click', () => {
+      points++;
+      pointsDisplay.innerText = `Points: ${points}`;
+      updateLevel();
+      completeChallengeBtn.classList.add('hidden');
+      challengeCard.innerText = "Click 'Next Challenge' to continue!";
+    });
+
+    function updateLevel() {
+      if(points >= 15) {
+        currentLevel = 'hard';
+      } else if(points >= 5) {
+        currentLevel = 'medium';
+      } else {
+        currentLevel = 'easy';
+      }
+      currentLevelDisplay.innerText = `Level: ${capitalize(currentLevel)}`;
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>

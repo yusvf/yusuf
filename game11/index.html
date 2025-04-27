@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youssef Game Zone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">YoussefZone</div>
+        <div class="nav-buttons">
+            <button id="gameBtn">🎮 Game</button>
+            <div class="dropdown">
+                <button id="langBtn">🌐 Language</button>
+                <div class="dropdown-content" id="langMenu">
+                    <button data-lang="en">English</button>
+                    <button data-lang="ar">العربية</button>
+                    <button data-lang="es">Español</button>
+                    <button data-lang="de">Deutsch</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button id="themeBtn">🎨 Theme</button>
+                <div class="dropdown-content" id="themeMenu">
+                    <button data-theme="light">Light</button>
+                    <button data-theme="dark">Dark</button>
+                    <button data-theme="pink">Pink</button>
+                    <button data-theme="neon">Neon</button>
+                </div>
+            </div>
+            <button id="musicBtn">🎵</button>
+        </div>
+    </nav>
+
+    <!-- Login Form -->
+    <div id="loginSection" class="login-section">
+        <h2 id="loginTitle">Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login</button>
+        <p id="loginError" class="error-message"></p>
+    </div>
+
+    <!-- Game Menu -->
+    <div id="gameMenu" class="game-menu hidden">
+        <h2 id="chooseGame">Choose Your Game</h2>
+        <div class="games">
+            <a href="game-card-challenge.html" class="game-card white">🃏 Card Challenge</a>
+            <a href="game-memory-match.html" class="game-card black">🧠 Memory Match</a>
+            <a href="game-quick-math.html" class="game-card pink">➕ Quick Math</a>
+            <a href="game-color-rush.html" class="game-card neon">🎨 Color Rush</a>
+            <a href="game-reflex-clicker.html" class="game-card neon">⚡ Reflex Clicker</a>
+            <!-- ألعاب جديدة -->
+            <a href="game-trivia-quiz.html" class="game-card blue">❓ Trivia Quiz</a>
+            <a href="game-maze-runner.html" class="game-card green">🏃 Maze Runner</a>
+            <a href="game-typing-test.html" class="game-card purple">⌨️ Typing Test</a>
+            <a href="game-space-shooter.html" class="game-card space">🚀 Space Shooter</a>
+            <a href="game-word-scramble.html" class="game-card gold">🔤 Word Scramble</a>
+        </div>
+    </div>
+
+    <audio id="clickSound" src="sounds/click.mp3"></audio>
+    <audio id="bgMusic" src="sounds/bg-music.mp3" loop></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
